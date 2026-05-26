@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
-      contents: read #This is required for actions/checkout
+      contents: read
 
     steps:
       - uses: actions/checkout@v4
@@ -22,6 +22,10 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.5'
+          tools: composer
+
+      - name: Validate PHP syntax
+        run: php -l index.php
 
       - name: Check if composer.json exists
         id: check_files
@@ -33,26 +37,32 @@ jobs:
         if: steps.check_files.outputs.files_exists == 'true'
         run: composer validate --no-check-publish && composer install --prefer-dist --no-progress
 
-
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: php-app
-          path: .
+          path: |
+            index.php
+            README.md
+            .php-version
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     permissions:
-      id-token: write #This is required for requesting the JWT
-      contents: read #This is required for actions/checkout
+      id-token: write
+      contents: read
 
     steps:
       - name: Download artifact from build job
         uses: actions/download-artifact@v4
         with:
           name: php-app
-      
+          path: .
+
+      - name: List deployment files
+        run: ls -la
+
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -60,11 +70,10 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_66F9D63ABFAA4BF7A5E002DF4BF6D764 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_A88094AD71C545149F190E6F6F9EC134 }}
 
-      - name: 'Deploy to Azure Web App'
+      - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v3
         id: deploy-to-webapp
         with:
-          app-name: 'webappnew'
-          slot-name: 'Production'
+          app-name: webappnew
+          slot-name: Production
           package: .
-          

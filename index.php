@@ -38,13 +38,17 @@ function format_feature_labels(array $slugs): string
         $slugs,
     );
 
-    return $labels
-        |> array_map(static fn(string $label): string => trim($label), ...)
-        |> join_feature_labels(...);
+    $trimmed = array_map(
+        static fn(string $label): string => trim($label),
+        $labels,
+    );
+
+    return join_feature_labels($trimmed);
 }
 
-$primarySlug = feature_slugs() |> array_first(...);
-$latestSlug = feature_slugs() |> array_last(...);
+$featureSlugs = feature_slugs();
+$primarySlug = array_first($featureSlugs);
+$latestSlug = array_last($featureSlugs);
 $featureSummary = format_feature_labels(feature_slugs());
 $requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
@@ -341,7 +345,7 @@ $year = (new DateTimeImmutable('now'))->format('Y');
                 <div>
                     <h1>Build faster with <span class="gradient">PHP 8.5</span></h1>
                     <p class="lead">
-                        A single-file landing page that uses PHP 8.5 language features — pipe operator,
+                        A single-file landing page that uses PHP 8.5 language features —
                         <code>array_first()</code>, <code>array_last()</code>, and strict typing — with no framework required.
                     </p>
                     <div class="actions">
@@ -375,16 +379,12 @@ $year = (new DateTimeImmutable('now'))->format('Y');
 
             <div class="grid">
                 <article class="card">
-                    <h3>Pipe operator</h3>
-                    <p>Chain transformations left-to-right with <code>|&gt;</code> instead of nested calls.</p>
+                    <h3>Array helpers</h3>
+                    <p><code>array_first()</code> and <code>array_last()</code> replace common boilerplate safely.</p>
                 </article>
                 <article class="card">
                     <h3>Clone with</h3>
                     <p>Update properties while cloning — ideal for immutable and readonly value objects.</p>
-                </article>
-                <article class="card">
-                    <h3>Array helpers</h3>
-                    <p><code>array_first()</code> and <code>array_last()</code> replace common boilerplate safely.</p>
                 </article>
                 <article class="card">
                     <h3>URI extension</h3>
@@ -401,12 +401,12 @@ $year = (new DateTimeImmutable('now'))->format('Y');
             </div>
 
             <div class="code" role="region" aria-label="PHP 8.5 example">
-                <header>index.php — pipe operator in this page</header>
+                <header>index.php — array helpers in this page</header>
                 <pre><code><?= htmlspecialchars(<<<'PHP'
-$featureSummary = format_feature_labels(feature_slugs());
-
-$primarySlug = feature_slugs() |> array_first(...);
-$latestSlug  = feature_slugs() |> array_last(...);
+$featureSlugs = feature_slugs();
+$primarySlug = array_first($featureSlugs);
+$latestSlug = array_last($featureSlugs);
+$featureSummary = format_feature_labels($featureSlugs);
 PHP, ENT_QUOTES, 'UTF-8') ?></code></pre>
             </div>
         </section>
